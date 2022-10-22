@@ -16,9 +16,5 @@
     "follow-redirects": "^1.15.2",
     "jira-connector": "^3.1.0"
   },
-  "devDependencies": {
-    "@babel/core": "^7.19.6",
-    "@babel/preset-env": "^7.19.4",
-    "@babel/register": "^7.18.9"
-  }
+  "devDependencies": {}
 }
