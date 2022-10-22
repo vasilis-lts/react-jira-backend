@@ -1,4 +1,4 @@
-*** React jira backend
+### React jira backend
 
 To start:
 
