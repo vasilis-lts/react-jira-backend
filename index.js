@@ -3,6 +3,7 @@ const app = express();
 const cors = require("cors");
 var JiraClient = require("jira-connector");
 const { apikey, password } = require("./settings");
+var axios = require('axios');
 
 app.use(cors());
 app.use((req, res, next) => {
@@ -24,7 +25,8 @@ var jira = new JiraClient({
 })
 
 app.get("/assets", async (req, res) => {
-  var axios = require('axios');
+  console.log("*************************");
+  console.log('GET Request: assets');
 
   var config = {
     method: 'get',
@@ -47,6 +49,8 @@ app.get("/assets", async (req, res) => {
 })
 
 app.get("/asset", async (req, res) => {
+  console.log("*************************");
+  console.log('GET Request: asset');
   console.log("assetid is set to " + req.query.assetid);
 
   // GET ISSUE
@@ -61,8 +65,8 @@ app.get("/asset", async (req, res) => {
 })
 
 app.get("/assetRequestsByAssetId", async (req, res) => {
-  var axios = require('axios');
-
+  console.log("*************************");
+  console.log('GET Request: assetRequestsByAssetId')
   console.log("assetid is set to " + req.query.assetid);
 
   var config = {
@@ -77,6 +81,41 @@ app.get("/assetRequestsByAssetId", async (req, res) => {
   axios(config)
     .then(function (response) {
       console.log('Request assets', response.data);
+      res.send(response.data)
+    })
+    .catch(function (error) {
+      console.log(error);
+      res.send(error);
+    });
+})
+
+app.get("/assetRequestsByAssetIdAndDate", async (req, res) => {
+  console.log("*************************");
+  console.log('GET Request: assetRequestsByAssetIdAndDate')
+  console.log("assetid is set to: " + req.query.assetid);
+  console.log("revenue filter is: " + req.query.revenuefilter);
+
+  switch (req.query.revenuefilter) {
+    case "Today": revenueFilterString = `%26"Start Date/Time">=startOfDay()`; break;
+    case "Week": revenueFilterString = `%26"Start Date/Time">=startOfWeek()`; break;
+    case "Month": revenueFilterString = `%26"Start Date/Time">=startOfMonth()`; break;
+    case "Year": revenueFilterString = `%26"Start Date/Time">=startOfYear()`; break;
+    case "All": revenueFilterString = ``; break;
+    default:
+      break;
+  }
+
+  var config = {
+    method: 'get',
+    url: `https://orangebg.atlassian.net/rest/api/2/search?jql=issuetype=10028%26project=AMF${revenueFilterString}%26"Select Asset"~"${req.query.assetid}"&maxResults=1000`,
+    headers: {
+      'Authorization': 'Basic bW9uaWFyb3Mub3JhbmdlQGdtYWlsLmNvbTpDaWt4UDQ3SExEQUZkMHRIWFd2WjQxNzQ=',
+      'Cookie': 'atlassian.xsrf.token=6a8987f4-5a8a-4cd7-baf1-e16e286bfac9_071232a93e03c73b62e413e0212b4ec730098496_lin'
+    }
+  };
+
+  axios(config)
+    .then(function (response) {
       res.send(response.data)
     })
     .catch(function (error) {
