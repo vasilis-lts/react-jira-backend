@@ -71,7 +71,7 @@ app.get("/assetRequestsByAssetId", async (req, res) => {
 
   var config = {
     method: 'get',
-    url: `https://orangebg.atlassian.net/rest/api/2/search?jql=issuetype=10028%26project=AMF%26"Select Asset"~"${req.query.assetid}"&maxResults=1000`,
+    url: `https://orangebg.atlassian.net/rest/api/2/search?jql=issuetype=10028%26project=AMF%26status!=Closed%26"Select Asset"~"${req.query.assetid}"&maxResults=1000`,
     headers: {
       'Authorization': 'Basic bW9uaWFyb3Mub3JhbmdlQGdtYWlsLmNvbTpDaWt4UDQ3SExEQUZkMHRIWFd2WjQxNzQ=',
       'Cookie': 'atlassian.xsrf.token=6a8987f4-5a8a-4cd7-baf1-e16e286bfac9_071232a93e03c73b62e413e0212b4ec730098496_lin'
@@ -92,22 +92,24 @@ app.get("/assetRequestsByAssetId", async (req, res) => {
 app.get("/assetRequestsByAssetIdAndDate", async (req, res) => {
   console.log("*************************");
   console.log('GET Request: assetRequestsByAssetIdAndDate')
-  console.log("assetid is set to: " + req.query.assetid);
-  console.log("revenue filter is: " + req.query.revenuefilter);
+  console.log("assetid: " + req.query.assetid);
+  console.log("revenue filter: " + req.query.revenuefilter);
 
   switch (req.query.revenuefilter) {
-    case "Today": revenueFilterString = `%26"Start Date/Time">=startOfDay()`; break;
-    case "Week": revenueFilterString = `%26"Start Date/Time">=startOfWeek()`; break;
-    case "Month": revenueFilterString = `%26"Start Date/Time">=startOfMonth()`; break;
-    case "Year": revenueFilterString = `%26"Start Date/Time">=startOfYear()`; break;
-    case "All": revenueFilterString = ``; break;
+    case "Today": revenueFilterString = `%26("End Date/Time">=startOfDay()AND"Start Date/Time"<now())`; break;
+    case "Week": revenueFilterString = `%26("End Date/Time">=startOfWeek()AND"Start Date/Time"<now())`; break;
+    case "Month": revenueFilterString = `%26("End Date/Time">=startOfMonth()AND"Start Date/Time"<now())`; break;
+    case "Year": revenueFilterString = `%26("End Date/Time">=startOfYear()AND"Start Date/Time"<now())`; break;
+    case "All": revenueFilterString = `%26"Start Date/Time"<now()`; break;
     default:
       break;
   }
 
+  const url = `https://orangebg.atlassian.net/rest/api/2/search?jql=issuetype=10028%26project=AMF${revenueFilterString}%26status!=Closed%26"Select Asset"~"${req.query.assetid}"&maxResults=1000`;
+
   var config = {
     method: 'get',
-    url: `https://orangebg.atlassian.net/rest/api/2/search?jql=issuetype=10028%26project=AMF${revenueFilterString}%26"Select Asset"~"${req.query.assetid}"&maxResults=1000`,
+    url: url,
     headers: {
       'Authorization': 'Basic bW9uaWFyb3Mub3JhbmdlQGdtYWlsLmNvbTpDaWt4UDQ3SExEQUZkMHRIWFd2WjQxNzQ=',
       'Cookie': 'atlassian.xsrf.token=6a8987f4-5a8a-4cd7-baf1-e16e286bfac9_071232a93e03c73b62e413e0212b4ec730098496_lin'
@@ -125,3 +127,5 @@ app.get("/assetRequestsByAssetIdAndDate", async (req, res) => {
 })
 
 app.listen(5000, () => console.log("listening on port 5000"));
+
+// url: `https://orangebg.atlassian.net/rest/api/2/search?jql=issuetype=10028%26project=AMF${revenueFilterString}%26"Select Asset"~"${req.query.assetid}"&maxResults=1000`,
