@@ -4,6 +4,8 @@ const cors = require("cors");
 var JiraClient = require("jira-connector");
 const { apikey, password } = require("./settings");
 var axios = require('axios');
+var request = require('request');
+var http = require('https');
 
 app.use(cors());
 app.use((req, res, next) => {
@@ -126,6 +128,26 @@ app.get("/assetRequestsByAssetIdAndDate", async (req, res) => {
     });
 })
 
-app.listen(5000, () => console.log("listening on port 5000"));
+app.get('/downloadAttachment', function (req, res) {
+  console.log("*************************");
+  console.log('GET Request: downloadAttachment')
+  console.log("attachmentUrl: " + req.query.attachmentUrl);
 
-// url: `https://orangebg.atlassian.net/rest/api/2/search?jql=issuetype=10028%26project=AMF${revenueFilterString}%26"Select Asset"~"${req.query.assetid}"&maxResults=1000`,
+  var requestSettings = {
+    url: req.query.attachmentUrl,
+    method: 'GET',
+    encoding: null,
+    headers: {
+      'Authorization': 'Basic bW9uaWFyb3Mub3JhbmdlQGdtYWlsLmNvbTpDaWt4UDQ3SExEQUZkMHRIWFd2WjQxNzQ=',
+      'Cookie': 'atlassian.xsrf.token=6a8987f4-5a8a-4cd7-baf1-e16e286bfac9_071232a93e03c73b62e413e0212b4ec730098496_lin'
+    }
+  };
+
+  request(requestSettings, function (error, response, body) {
+    res.set('Content-Type', 'image');
+    console.log(body);
+    res.send(body);
+  });
+});
+
+app.listen(5000, () => console.log("listening on port 5000"));
