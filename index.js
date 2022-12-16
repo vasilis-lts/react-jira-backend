@@ -50,6 +50,54 @@ app.get("/assets", async (req, res) => {
     });
 })
 
+
+
+
+
+app.get("/assetsNew", async (req, res) => {
+  console.log("*************************");
+  console.log('GET Request: assets with attachments');
+
+  var config = {
+    method: 'get',
+    url: 'https://orangebg.atlassian.net/rest/api/2/search?jql=issuetype=10027%26project=AMF%26status=Open&maxResults=1000',
+    headers: {
+      'Authorization': 'Basic ' + apikey,
+      'Cookie': 'atlassian.xsrf.token=6a8987f4-5a8a-4cd7-baf1-e16e286bfac9_071232a93e03c73b62e413e0212b4ec730098496_lin'
+    }
+  };
+
+  // get all assets
+  let issuesResponse;
+  try {
+    issuesResponse = await axios(config);
+  } catch (error) {
+    console.log(error);
+    res.send(error);
+  }
+
+
+  // get issue data and assign to issue
+  let issuesData = issuesResponse.data;
+  let issueIndex = 0;
+  for (const issue of issuesData.issues) {
+    const issueResponse = await jira.issue.getIssue({ issueId: issue.id });
+    if (issueResponse) {
+      issuesData.issues[issueIndex].issue = issueResponse;
+    } else {
+      console.log(error);
+      res.send(error);
+    }
+    issueIndex++;
+  }
+
+  res.send(issuesData);
+})
+
+
+
+
+
 app.get("/asset", async (req, res) => {
   console.log("*************************");
   console.log('GET Request: asset');
